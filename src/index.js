@@ -2,6 +2,7 @@ require('./models/user')
 const express = require('express')
 const mongoose = require('mongoose')
 const authRoutes = require('./routes/authRoutes')
+const requireAuth = require('./middlewares/requireAuth')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -21,8 +22,8 @@ mongoose.connection.on('error', err => {
   console.error('Unable to connect to mongo', err)
 })
 
-app.get('/', (req, res) => {
-  res.send('Hi there!')
+app.get('/', requireAuth, (req, res) => {
+  res.send(`Your account detail is: ${req.user}`)
 })
 
 app.listen(port, () => {
