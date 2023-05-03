@@ -9,10 +9,31 @@ router.post('/signup', async (req, res) => {
   try {
     const user = new User({ email, password })
     await user.save()
-    const token = jwt.sign({userId: user._id}, 'MY_SECRET_KEY')
-    res.send({token})
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET)
+    res.send({ token })
   } catch (error) {
     res.status(422).send(error.message)
+  }
+})
+
+router.post('/signin', async (req, res) => {
+  const { email, password } = req.body
+  if (!email || !password) {
+    res.status(422).send({ error: 'Email and password must be provided' })
+    return
+  }
+  const user = await User.findOne({ email })
+  if (!user) {
+    res.status(404).send({ error: 'Email not found' })
+    return
+  }
+  try {
+    await user.comparePassword(password)
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET)
+    res.send({ token })
+  } catch (error) {
+    res.status(401).send({ error: 'Invalid password or email' })
+    return
   }
 })
 
