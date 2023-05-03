@@ -11,4 +11,23 @@ router.get('/tracks', async (req, res) => {
   res.send(tracks)
 })
 
+router.post('/tracks', async (req, res) => {
+  const { name, locations } = req.body
+  if (!name || !locations) {
+    res.status(422).send({ error: 'name and locations must be provided' })
+    return
+  }
+  try {
+    const newTrack = new track({
+      name: name,
+      locations: locations,
+      userId: req.user._id,
+    })
+    await newTrack.save()
+    res.send(newTrack)
+  } catch (err) {
+    res.status(422).send({ error: err.message })
+  }
+})
+
 module.exports = router
